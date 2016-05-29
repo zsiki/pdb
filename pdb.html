@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="hun">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>PointDB</title>
+	<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+	<script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+	<script src="http://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+	<link rel="stylesheet" href="style.css">
+	<script>
+	function make_valid (data) {
+		data = data.trim();
+		return data;
+	}
+
+	$(document).ready(function() {
+		// create tabs from list
+		$( "#tabs" ).tabs();
+
+		// set up point dialog
+		$("#pdialog").dialog({
+			autoOpen: false,
+			buttons: {
+				OK: function() {
+					$(this).dialog("close");
+				}
+			}
+		});
+	
+		// fill table of point base data
+		$("#pfilter").click(function() {
+			data = new Object();
+			data.table="poi";
+			if ($("#pname").val().length) {
+				data.pname= make_valid($("#pname").val());
+			};
+			if ($("#ptype").val().length) {
+				data.ptype= make_valid($("#ptype").val());
+			};
+			if ($("#premark").val().length) {
+				data.premark= $("#premark").val();
+			};
+			var url = "query.php?";
+			$.ajax({url: url, data: data, success: function(result){
+				if (result.match(/^-[1-9]/)) {
+					alert('Error from server: ' + result);
+					return;
+				}
+				var pdata = JSON.parse(result);
+				var html = "";
+				if (pdata.length) {
+					html += "<table><tr><th>&nbsp;</th><th>Point</th><th>Type</th><th>Remark</th></tr>";
+					$.each(pdata, function(i, p) {
+						html += "<tr><td><img class=\"pedit\" id=\"pe" + p.id + "\" src=\"edit.png\" title=\"Edit\" />" +
+							"<img class=\"pdel\" id=\"pd" + p.id + "\" src=\"del.png\" title=\"Delete\"/></td><td>" + 
+							p.name + "</td><td>" + p.type +
+							"</td><td>" + p.remark + "</td></tr>";
+					});
+					html += "</table>";
+				}
+				html += "<p><img id=\"pins\" src=\"ins.png\" title=\"Insert\" /></p>";
+				$("#ptable").html(html);
+				// handling point edit
+				$(".pedit").click(function(e) {
+					var id = $(this).attr('id').substr(2);
+					var url = "query.php?";
+					data = new Object();
+					data.table = "poi";
+					data.pid = id;
+					$.ajax({url: url, data: data, success: function(result){
+						if (result.match(/^-[1-9]/)) {
+							alert('Error from server: ' + result);
+							return;
+						}
+						var pdata = JSON.parse(result);
+						$("#pname_edit").val(pdata[0].name);
+						$("#ptype_edit").val(pdata[0].type);
+						$("#premark_edit").val(pdata[0].remark);
+						$("#pdialog").dialog("open");
+					}});
+				});
+				// handling point delete
+				$(".pdel").on('click', function(e) {
+					var id = $(this).attr('id').substr(2);
+					alert("Are you sure to delete?");
+				});
+				// handling point insert
+				$("#pins").on('click', function(e) {
+					$("#pdialog").dialog("open");
+				});
+			}});
+		});
+	});
+  </script>
+</head>
+<body>
+<div id="tabs">
+	<ul>
+		<li><a href="#tabs-points">Points</a></li>
+		<li><a href="#tabs-2">Meghatározások</a></li>
+		<li><a href="#tabs-3">Coordinate list</a></li>
+		<li><a href="#tabs-4">Single point</a></li>
+	</ul>
+
+	<div id="tabs-points">
+	<form>
+		<fieldset>
+			<legend>Filter</legend>
+			<div class="container">
+				<label>Point name:</label><br /><input type="text" id="pname" size="10" />
+			</div>
+			<div class="container">
+				<label>Type:</label><br /><input type="text" id="ptype" size="10" />
+			</div>
+			<div class="container">
+				<label>Comment:</label><br /><input type="text" id="premark" size="15" />
+			</div>
+			<div class="container"><br />
+				<input id="pfilter" type="button" value="Go" />
+			</div>
+		</fieldset>
+	</form>
+  <div id="ptable">
+  </div>
+  </div>
+  <div id="tabs-2">
+    <p>Innen lehet kiválasztani a meghatározás időpontját</p>
+  </div>
+  <div id="tabs-3">
+    <p>Itt a koordinátákat lehet kiválasztani</p>
+  </div>
+  <div id="tabs-4">
+   <p>Itt egy pontra vonatkozó adatok lesznek</p>
+  </div>
+</div>
+
+<div id="pdialog">
+	<div>
+		<label for="pname_edit">Point ID:</label>
+		<input type="text" id="pname_edit" />
+	</div>
+	<div>
+		<label for="ptype_edit">Point type</label>
+		<input type="text" id="ptype_edit" />
+	</div>
+	<div>
+		<label for="premark_edit">Remark</label>
+		<input type="text" id="premark_edit" />
+	</div>
+</div>
+</body>
+</html>
