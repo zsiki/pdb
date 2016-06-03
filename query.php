@@ -10,6 +10,7 @@
  *    ptype: point type SQL pattern (optional)
  *    from:  starting date or datetime (optional)
  *    to:    end date or datetime (optional)
+ *    proj:  name of projection (optional)
  *
  */
 
@@ -25,9 +26,9 @@
 		switch  ($_REQUEST['table']) {
 			case "coo":
 				$tables = "$coo_table, $poi_table, $pro_table, $typ_table";
-				$cols = "$poi_table.name, $coo_table.easting, $coo_table.northing, $coo_table.elevation, $pro_table.name, $coo_table.date";
+				$cols = "$poi_table.name, $coo_table.east, $coo_table.north, $coo_table.elev, $pro_table.name, $coo_table.datetime";
 				$where = "$coo_table.point_id = $poi_table.id and $coo_table.epsg = $pro_table.epsg and $poi_table.type_id = $typ_table.id";
-				$order = "$poi_table.name, $coo_table.date";
+				$order = "$poi_table.name, $coo_table.datetime";
 				if (isset($_REQUEST['pname']) && strlen(trim($_REQUEST['pname']))){
 					$where .= " and $poi_table.name like '" . $_REQUEST['pname']  . "'";
 				}
@@ -38,7 +39,7 @@
 					if (preg_match($date_regexp, $_REQUEST['from']) ||
 						preg_match($date_regexp1, $_REQUEST['from'])) {
 						$from_d = $_REQUEST['from'];
-						$where .= " and $coo_table.date >= '$from_d'";
+						$where .= " and $coo_table.datetime >= '$from_d'";
 					} else {
 						echo -3;	// date format error
 						exit();
@@ -48,11 +49,15 @@
 					if (preg_match($date_regexp, $_REQUEST['to']) ||
 						preg_match($date_regexp1, $_REQUEST['to'])) {
 						$to_d = $_REQUEST['to'];
-						$where .= " $coo_table.date <= '$to_d'";
+						$where .= " $coo_table.datetime <= '$to_d'";
 					} else {
 						echo -4;	// date format error
 						exit();
 					}
+				}
+				if (isset($_REQUEST['proj']) && strlen(trim($_REQUEST['proj']))) {
+						$proj = $_REQUEST['proj'];
+						$where .= " $pro_table.name like '$proj'";
 				}
 				break;
 			case "poi":
