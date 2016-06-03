@@ -74,10 +74,14 @@
 							return;
 						}
 						var pdata = JSON.parse(result);
-						$("#pname_edit").val(pdata[0].name);
-						$("#ptype_edit").val(pdata[0].type);
-						$("#premark_edit").val(pdata[0].remark);
-						$("#pdialog").dialog("open");
+						if (pdata.length > 0) {
+							$("#pname_edit").val(pdata[0].name);
+							$("#ptype_edit").val(pdata[0].type);
+							$("#premark_edit").val(pdata[0].remark);
+							$("#pdialog").dialog("open");
+						} else {
+							alert("Refresh your view, data may have been deleted");
+						}
 					}});
 				});
 				// handling point delete
@@ -87,6 +91,10 @@
 				});
 				// handling point insert
 				$("#pins").on('click', function(e) {
+					// clear fileds in dialog
+					$("#pname_edit").val('');
+					$("#ptype_edit").val('');
+					$("#premark_edit").val('');
 					$("#pdialog").dialog("open");
 				});
 			}});
