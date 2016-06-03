@@ -1,7 +1,7 @@
 <?php
 /*
- * Sample script to query coordinates from ulyxes monitoring
- * (httpreader)
+ * Server side script to query data from database
+ * JSON array of objects is returned
  *
  * query parameters:
  *    table: coo/poi/pro/typ/ids coordinates/points/projections/types/point names
@@ -12,6 +12,11 @@
  *    to:    end date or datetime (optional)
  *    proj:  name of projection (optional)
  *
+ *    sample queries:
+ *    query.php?table=ids           query point names
+ *    query.php?table=poi&pname=1%  query points with name like '1%'
+ *    query.php?table=typ           query different point types
+ *    query.php?table=coo&from=2016-05-13 query coordinates after
  */
 
 	//error_log(http_build_query($_REQUEST));
